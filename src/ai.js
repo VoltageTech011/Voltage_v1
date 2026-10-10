@@ -31,6 +31,7 @@ function extractAnswer(data) {
 
     const keys = [
         "answer",
+        "data",
         "response",
         "output",
         "content",
