@@ -1,18 +1,20 @@
 
 {
-  "name": "voltage-ai",
+  "name": "voltage",
   "version": "1.0.0",
-  "description": "Voltage — personal AI system",
+  "description": "Voltage — a personal multi-capability AI system",
   "main": "src/server.js",
   "type": "commonjs",
-  "engines": {
-    "node": ">=20"
-  },
   "scripts": {
     "start": "node src/server.js"
   },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "dotenv": "^16.4.7",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pino": "^9.6.0"
   }
 }
