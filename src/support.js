@@ -9,7 +9,7 @@ const SUPPORT_CONFIG = {
     name: "Voltage Intelligence",
     owner: "Thereal_VoltageLord",
     version: "1.0.0",
-    provider: "gemini",
+    provider: "Voltage",
     maxQuestionLength: 2000,
     maxHistoryMessages: 8
 };
@@ -27,7 +27,7 @@ IDENTITY
 KNOWN PROJECT FEATURES
 - WhatsApp pairing using a pairing code.
 - Connection status and health monitoring.
-- AI integrations for Gemini and Claude.
+- AI integrations for Voltage.
 - Configurable command prefix, defaulting to ".".
 - Private mode is the default configuration.
 - Known command names include menu, ping, status, about, owner,
