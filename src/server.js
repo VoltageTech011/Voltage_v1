@@ -2,6 +2,7 @@
 require("dotenv").config();
 
 const crypto = require("crypto");
+const path = require("path");
 const express = require("express");
 const { router: aiRouter } = require("./ai");
 const whatsapp = require("./whatsapp");
@@ -25,27 +26,14 @@ function isAuthorized(req) {
 
     if (!expected || !provided) return false;
 
-    const expectedBuffer = Buffer.from(expected);
-    const providedBuffer = Buffer.from(provided);
+    const a = Buffer.from(expected);
+    const b = Buffer.from(provided);
 
-    if (expectedBuffer.length !== providedBuffer.length) {
-        return false;
-    }
-
-    return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 app.get("/", (req, res) => {
-    res.json({
-        name: config.name,
-        description: "Personal multi-capability AI system",
-        status: "online",
-        owner: config.owner,
-        version: config.version,
-        platform: "WhatsApp",
-        runtime: "Node.js",
-        whatsapp: whatsapp.getStatus().status
-    });
+    res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
 app.get("/api/health", (req, res) => {
@@ -72,6 +60,7 @@ app.get("/api/info", (req, res) => {
 app.use("/api/ai", aiRouter);
 
 app.get("/api/whatsapp/status", (req, res) => {
+    res.set("Cache-Control", "no-store");
     res.json({
         status: true,
         whatsapp: whatsapp.getStatus()
@@ -89,7 +78,7 @@ app.post("/api/whatsapp/pair", async (req, res) => {
     if (!isAuthorized(req)) {
         return res.status(401).json({
             status: false,
-            error: "Unauthorized."
+            error: "Invalid gateway access key."
         });
     }
 
@@ -98,22 +87,24 @@ app.post("/api/whatsapp/pair", async (req, res) => {
     if (typeof number !== "string" || !number.trim()) {
         return res.status(400).json({
             status: false,
-            error: "Provide number in the JSON request body."
+            error: "Provide your WhatsApp number."
         });
     }
 
     try {
         const status = await whatsapp.connect(number);
 
+        res.set("Cache-Control", "no-store");
+
         return res.json({
             status: true,
             whatsapp: status,
             instructions: status.pairingCode
-                ? "Open WhatsApp > Linked devices > Link a device > Link with phone number, then enter the pairing code."
-                : "Check the WhatsApp status endpoint for the latest connection state."
+                ? "Enter the code in WhatsApp > Linked devices > Link with phone number."
+                : "Check the status endpoint for the current connection state."
         });
     } catch (error) {
-        console.error("[Voltage] Pairing request failed:", error.message);
+        console.error("[Voltage] Pairing failed:", error.message);
 
         return res.status(400).json({
             status: false,
@@ -151,7 +142,7 @@ const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`Version: ${config.version}`);
     console.log(`Port: ${PORT}`);
     console.log("AI providers: Gemini + Claude");
-    console.log("WhatsApp engine: Ready for pairing");
+    console.log("Pairing dashboard: enabled");
     console.log("----------------------------------");
 });
 
@@ -170,7 +161,6 @@ async function shutdown(signal) {
     }
 
     server.close(() => process.exit(0));
-
     setTimeout(() => process.exit(1), 10000).unref();
 }
 
